@@ -267,26 +267,27 @@ class Parser {
 
             /// Checking for font Size.
             var _clr = _nodeChildren(font, 'color', attribute: 'rgb');
-            if (_clr != null && _clr is bool && !_clr) {
+            //TODO check this condition
+            if (_clr is bool && !_clr) {
               fontColor = _clr.toString();
             }
 
             /// Checking for font Size.
-            String? _size = _nodeChildren(font, 'sz', attribute: 'val');
-            if (_size != null && _size is String) {
+            final _size = _nodeChildren(font, 'sz', attribute: 'val');
+            if (_size is String) {
               fontSize = double.parse(_size).round();
             }
 
             /// Checking for bold
             var _bold = _nodeChildren(font, 'b');
-            if (_bold != null && _bold is bool && _bold) {
-              isBold = true;
+            if (_bold is bool) {
+              isBold = _bold;
             }
 
             /// Checking for italic
             var _italic = _nodeChildren(font, 'i');
-            if (_italic != null && _italic) {
-              isItalic = true;
+            if (_italic is bool) {
+              isItalic = _italic;
             }
 
             /// Checking for double underline
@@ -496,6 +497,10 @@ class Parser {
       case 'b':
         value = _parseValue(node.findElements('v').first) == '1';
         break;
+      //date, ISO8601
+      case 'd':
+        value = DateTime.tryParse(_parseValue(node.findElements('v').first));
+        break;
       // error
       case 'e':
       // formula
@@ -549,7 +554,7 @@ class Parser {
     sheetObject.updateCell(
         CellIndex.indexByColumnRow(columnIndex: colIndex, rowIndex: rowIndex),
         value);
-    if (value.runtimeType == String) {
+    if (value is String) {
       _excel._sharedStrings.add(value);
     }
   }

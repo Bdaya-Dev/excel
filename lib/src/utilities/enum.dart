@@ -29,6 +29,7 @@ enum HorizontalAlign {
 ///`Cell Type`
 ///
 enum CellType {
+  Date,
   String,
   int,
   Formula,

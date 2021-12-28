@@ -675,10 +675,14 @@ class Save {
     return cell;
   } */
 
+  String _ISO8601Date(DateTime date) {
+    return date.toIso8601String();
+  }
+
   // Manage value's type
   XmlElement _createCell(
       String sheet, int columnIndex, int rowIndex, dynamic value) {
-    if (value.runtimeType == String) {
+    if (value is String) {
       _excel._sharedStrings.add(value);
     }
 
@@ -686,7 +690,10 @@ class Save {
 
     var attributes = <XmlAttribute>[
       XmlAttribute(XmlName('r'), rC),
-      if (value.runtimeType == String) XmlAttribute(XmlName('t'), 's'),
+      if (value is String)
+        XmlAttribute(XmlName('t'), 's')
+      else if (value is DateTime)
+        XmlAttribute(XmlName('t'), 'd'),
     ];
 
     if (_excel._colorChanges &&
@@ -725,11 +732,15 @@ class Save {
             if (value is Formula)
               XmlElement(XmlName('f'), [], [XmlText(value.formula.toString())]),
             XmlElement(XmlName('v'), [], [
-              XmlText(value is String
-                  ? _excel._sharedStrings.indexOf(value).toString()
-                  : value is Formula
-                      ? ''
-                      : value.toString())
+              XmlText(
+                value is String
+                    ? _excel._sharedStrings.indexOf(value).toString()
+                    : value is Formula
+                        ? ''
+                        : value is DateTime
+                            ? _ISO8601Date(value)
+                            : value.toString(),
+              )
             ]),
           ];
     return XmlElement(XmlName('c'), attributes, children);
