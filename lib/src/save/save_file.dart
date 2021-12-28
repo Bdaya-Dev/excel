@@ -676,7 +676,8 @@ class Save {
   } */
 
   String _ISO8601Date(DateTime date) {
-    return date.toIso8601String();
+    final dateStr = date.toIso8601String();
+    return dateStr.substring(0, dateStr.indexOf('T'));
   }
 
   // Manage value's type
