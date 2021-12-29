@@ -97,7 +97,10 @@ class Save {
     _excel._sharedStrings = _SharedStringsMaintainer.instance;
     _excel._sharedStrings.clear();
 
-    _excel._sheetMap.forEach((sheet, value) {
+    for (var item in _excel._sheetMap.entries) {
+      final sheet = item.key;
+      final value = item.value;
+
       ///
       /// Create the sheet's xml file if it does not exist.
       if (_excel._sheets[sheet] == null) {
@@ -130,7 +133,7 @@ class Save {
           }
         }
       }
-    });
+    }
   }
 
   _setColumnWidth(String sheetName) {
@@ -505,7 +508,7 @@ class Save {
           '${_excel._cellStyleList.length + _innerCellStyle.length}'));
     }
 
-    _innerCellStyle.forEach((cellStyle) {
+    for (var cellStyle in _innerCellStyle) {
       String backgroundColor = cellStyle.backgroundColor;
 
       _FontStyle _fs = _FontStyle(
@@ -582,7 +585,7 @@ class Save {
       }
 
       celx.children.add(XmlElement(XmlName('xf'), attributes, children));
-    });
+    }
   }
 
   /// Writing the value of excel cells into the separate
@@ -677,7 +680,8 @@ class Save {
 
   String _ISO8601Date(DateTime date) {
     final dateStr = date.toIso8601String();
-    return dateStr.substring(0, dateStr.indexOf('T'));
+    final res = dateStr.substring(0, dateStr.indexOf('T'));
+    return res;
   }
 
   // Manage value's type
@@ -691,21 +695,14 @@ class Save {
 
     var attributes = <XmlAttribute>[
       XmlAttribute(XmlName('r'), rC),
-      if (value is String)
-        XmlAttribute(XmlName('t'), 's')
-      else if (value is DateTime)
-        XmlAttribute(XmlName('t'), 'd'),
+      if (value is String) XmlAttribute(XmlName('t'), 's'),
+      // if (value is DateTime) XmlAttribute(XmlName('t'), 'd'),
     ];
 
-    if (_excel._colorChanges &&
-        (_excel._sheetMap[sheet]?._sheetData != null) &&
-        _excel._sheetMap[sheet]!._sheetData[rowIndex] != null &&
-        _excel._sheetMap[sheet]!._sheetData[rowIndex]![columnIndex]
-                ?.cellStyle !=
-            null) {
-      CellStyle cellStyle = _excel
-          ._sheetMap[sheet]!._sheetData[rowIndex]![columnIndex]!.cellStyle!;
-      int upperLevelPos = _checkPosition(_excel._cellStyleList, cellStyle);
+    final data = _excel._sheetMap[sheet]?._sheetData[rowIndex]?[columnIndex];
+    final cellStyle = data?.cellStyle;
+    if (_excel._colorChanges && cellStyle != null) {
+      var upperLevelPos = _checkPosition(_excel._cellStyleList, cellStyle);
       if (upperLevelPos == -1) {
         int lowerLevelPos = _checkPosition(_innerCellStyle, cellStyle);
         if (lowerLevelPos != -1) {
@@ -726,7 +723,6 @@ class Save {
             XmlName('s'), '${_excel._cellStyleReferenced[sheet]![rC]}'),
       );
     }
-
     var children = value == null
         ? <XmlElement>[]
         : <XmlElement>[
